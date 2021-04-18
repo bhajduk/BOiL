@@ -2,6 +2,8 @@ package com.ahbh.transport.service;
 
 import com.ahbh.transport.domain.BrokerIssueInput;
 import com.ahbh.transport.domain.BrokerIssueOutput;
+import com.ahbh.transport.exception.InvalidInput;
+import com.ahbh.transport.exception.NoCycleException;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -21,7 +23,10 @@ public class BrokerIssueSolver {
 
     List<double[][]> stepByStepSolution = new ArrayList<>();
 
-    public BrokerIssueOutput solve(BrokerIssueInput input){
+    public BrokerIssueOutput solve(BrokerIssueInput input) {
+
+        validateInput(input);
+
         this.transportCostsTable = input.getTransportCostsTable();
         this.supplyTable = input.getSupplyTable();
         this.demandTable = input.getDemandTable();
@@ -34,6 +39,17 @@ public class BrokerIssueSolver {
         return output;
     }
 
+    private void validateInput(BrokerIssueInput input) {
+        double[][] transportCostsTable = input.getTransportCostsTable();
+        if (transportCostsTable == null ||
+                input.getSupplyTable().length != transportCostsTable.length ||
+                input.getDemandTable().length != transportCostsTable[0].length ||
+                lockedRoute < -1){
+            throw new InvalidInput();
+        }
+
+    }
+
     public double solve(double[][] transportCostsTable, double[] supplyTable, double[] demandTable, int lockedRoute) {
         this.transportCostsTable = transportCostsTable;
         this.supplyTable = supplyTable;
@@ -44,7 +60,7 @@ public class BrokerIssueSolver {
         return solve();
     }
 
-    private double solve(){
+    private double solve() {
         findFirstSolution();
 
         while (true) {
@@ -55,21 +71,26 @@ public class BrokerIssueSolver {
                 break;
             }
             List<int[]> cycle = createCycle(suboptimalIndexes);
-            fitTransportTable(cycle, suboptimalIndexes);
+            refactorTransportTable(cycle, suboptimalIndexes);
         }
         return objectiveFunctionValue();
     }
 
-    private void fitTransportTable(List<int[]> nodes, int[] maxElem) {
-        Double minElemValue = profitabilityTable[maxElem[0]][maxElem[1]];
-        int maxElementIndex = -1;
+    private void refactorTransportTable(List<int[]> nodes, int[] maxElem) {
+        Double maxElemValue = profitabilityTable[maxElem[0]][maxElem[1]];
         List<Double> values = new ArrayList<>();
+        int maxElementIndex = -1;
 
+        // adding elements to list to find the smallest element
         for (int i = 0; i < nodes.size(); i++) {
             int[] node = nodes.get(i);
-            if(lockedRoute != node[1])
+
+            // excluding value from locked route
+            if (lockedRoute != node[1])
                 values.add(transportTable[node[0]][node[1]]);
-            if (profitabilityTable[node[0]][node[1]] == minElemValue)
+
+            // getting index of max value
+            if (profitabilityTable[node[0]][node[1]].equals(maxElemValue))
                 maxElementIndex = i;
         }
 
@@ -78,8 +99,9 @@ public class BrokerIssueSolver {
             if (b == 0) return -1;
             if (a == b) return 0;
             return a > b ? 1 : -1;
-        }).get();
+        }).orElseThrow(() -> new NoCycleException());
 
+        // shifting the value along with the cycle road
         for (int j = 0; j < nodes.size(); j++) {
             int[] node = nodes.get(maxElementIndex % (nodes.size()));
             maxElementIndex++;
@@ -99,8 +121,10 @@ public class BrokerIssueSolver {
         double[] tempSupplyTable = supplyTable.clone();
         double[] tempDemandTable = demandTable.clone();
 
+        // running additional steps if any route is locked
         if (lockedRoute != -1) calculateLockedRouteFirst(tempDemandTable, tempSupplyTable);
 
+        // finding the first solution with northwest apex method
         for (int i = 0; i < supplyTable.length; i++) {
             if (tempSupplyTable[i] > 0) {
                 for (int j = 0; j < demandTable.length; j++) {
@@ -134,9 +158,8 @@ public class BrokerIssueSolver {
         Map<Integer, Double> indexValueMap = new HashMap<>();
 
         int loopRange = transportCostsTable.length;
-        if(!balanced) loopRange--;
+        if (!balanced) loopRange--;
 
-        if(lockedRoute != -1)
         for (int i = 0; i < loopRange; i++) {
             indexValueMap.put(i, transportCostsTable[i][lockedRoute]);
         }
@@ -188,7 +211,7 @@ public class BrokerIssueSolver {
         }
         // Zablokowanie trasy przez ustawienie minimalnej wartości w tablicy wskaźników optymalności
         // w miejscu gdzie nie może się zmieniać
-        if(lockedRoute != -1){
+        if (lockedRoute != -1) {
             for (int i = 0; i < transportTable.length; i++) {
                 if (transportTable[i][lockedRoute] == 0) {
                     profitabilityTable[i][lockedRoute] = Double.MIN_VALUE;
@@ -229,18 +252,18 @@ public class BrokerIssueSolver {
 
         for (int y1 = 0; y1 < rows; y1++) {
             for (int x1 = 0; x1 < columns; x1++) {
-                if (profitabilityTable[y1][x1] == null || profitabilityTable[y1][x1] == maxElemValue) {
+                if (profitabilityTable[y1][x1] == null || profitabilityTable[y1][x1].equals(maxElemValue)) {
                     cycleEdgeList.add(new int[]{y1, x1});
                     for (int y2 = y1 + 1; y2 < rows; y2++) {
                         for (int x2 = x1 + 1; x2 < columns; x2++) {
-                            if ((profitabilityTable[y1][x2] == null || profitabilityTable[y1][x2] == maxElemValue)
-                                    && (profitabilityTable[y2][x1] == null || profitabilityTable[y2][x1] == maxElemValue)
-                                    && (profitabilityTable[y2][x2] == null || profitabilityTable[y2][x2] == maxElemValue)) {
+                            if ((profitabilityTable[y1][x2] == null || profitabilityTable[y1][x2].equals(maxElemValue))
+                                    && (profitabilityTable[y2][x1] == null || profitabilityTable[y2][x1].equals(maxElemValue))
+                                    && (profitabilityTable[y2][x2] == null || profitabilityTable[y2][x2].equals(maxElemValue))) {
                                 cycleEdgeList.add(new int[]{y1, x2});
                                 cycleEdgeList.add(new int[]{y2, x2});
                                 cycleEdgeList.add(new int[]{y2, x1});
 
-                                if (cycleEdgeList.stream().anyMatch(p -> profitabilityTable[p[0]][p[1]] == maxElemValue)) {
+                                if (cycleEdgeList.stream().anyMatch(p -> profitabilityTable[p[0]][p[1]].equals(maxElemValue))) {
                                     return cycleEdgeList;
                                 }
                             }
