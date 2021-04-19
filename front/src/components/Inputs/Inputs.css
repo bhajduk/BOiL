@@ -1,0 +1,81 @@
+*:focus {
+    outline: none;
+}
+
+* {
+    font-family: Roboto, sans-serif;
+}
+
+.inputsContainer {
+    background-color: rgb(15, 15, 15);
+    display: grid;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.inputsContainer > div {
+    /* border: 1px solid rgb(255, 255, 255); */
+    padding: 20px;
+}
+
+.inputsContainer > div > input {
+    color: rgb(255, 255, 255);
+    width: 100%;
+    padding: 10px 15px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: none;
+    border-bottom: 1px solid rgb(200, 200, 200);
+    background-color: rgba(0, 0, 0, 0);
+    text-decoration: none;
+    letter-spacing: 0.2rem;
+    font-size: 1rem;
+}
+
+input::placeholder {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    cursor: pointer;
+    display: block;
+    width: 8px;
+    text-align: center;
+    position: relative;
+}
+input[type="number"]:hover::-webkit-inner-spin-button {
+    background: rgba(255, 255, 255, 0) url("./arrows.png") no-repeat 50% 50%;
+    width: 14px;
+    height: 14px;
+    padding: 4px;
+    position: relative;
+    right: 4px;
+    border-radius: 28px;
+}
+
+.btn {
+    cursor: pointer;
+    border: 1px solid rgb(200, 200, 200);
+    padding: 17px 0;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.2rem;
+}
+
+.btn:hover {
+    background-color: rgb(200, 200, 200);
+    color: black;
+    transition: 0.2s ease-in;
+}
+
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
+                                    supported by Chrome, Edge, Opera and Firefox */
+}

@@ -1,0 +1,50 @@
+.steps {
+    /* background-color: rgb(19, 56, 56); */
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    justify-content: center;
+    margin-top: 70px;
+}
+
+.steps > h3 {
+    border: 1px solid rgb(200, 200, 200);
+    width: 100px;
+    padding: 10px 15px;
+    color: rgb(200, 200, 200);
+}
+
+.stepBtn {
+    display: block;
+    cursor: pointer;
+    background-color: rgb(200, 200, 200);
+    padding: 19px 0;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.2rem;
+    width: 206px;
+    margin-left: auto;
+    margin-right: auto;
+    color: black;
+    margin-top: 30px;
+    margin-bottom: 50px;
+}
+
+.stepBtn:hover {
+    background-color: rgb(230, 230, 230);
+    transition: 0.2s ease-in-out;
+}
+
+.stepsCounter {
+    margin-top: 60px;
+    text-align: center;
+    color: rgb(200, 200, 200);
+}
+
+.noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
