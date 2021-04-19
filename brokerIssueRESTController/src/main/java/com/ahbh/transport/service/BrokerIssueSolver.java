@@ -90,7 +90,7 @@ public class BrokerIssueSolver {
                 values.add(transportTable[node[0]][node[1]]);
 
             // getting index of max value
-            if (profitabilityTable[node[0]][node[1]].equals(maxElemValue))
+            if (profitabilityTable[node[0]][node[1]] == maxElemValue)
                 maxElementIndex = i;
         }
 
@@ -252,18 +252,18 @@ public class BrokerIssueSolver {
 
         for (int y1 = 0; y1 < rows; y1++) {
             for (int x1 = 0; x1 < columns; x1++) {
-                if (profitabilityTable[y1][x1] == null || profitabilityTable[y1][x1].equals(maxElemValue)) {
+                if (profitabilityTable[y1][x1] == null || profitabilityTable[y1][x1] == maxElemValue) {
                     cycleEdgeList.add(new int[]{y1, x1});
                     for (int y2 = y1 + 1; y2 < rows; y2++) {
                         for (int x2 = x1 + 1; x2 < columns; x2++) {
-                            if ((profitabilityTable[y1][x2] == null || profitabilityTable[y1][x2].equals(maxElemValue))
-                                    && (profitabilityTable[y2][x1] == null || profitabilityTable[y2][x1].equals(maxElemValue))
-                                    && (profitabilityTable[y2][x2] == null || profitabilityTable[y2][x2].equals(maxElemValue))) {
+                            if ((profitabilityTable[y1][x2] == null || profitabilityTable[y1][x2] == maxElemValue)
+                                    && (profitabilityTable[y2][x1] == null || profitabilityTable[y2][x1] == maxElemValue)
+                                    && (profitabilityTable[y2][x2] == null || profitabilityTable[y2][x2] == maxElemValue)) {
                                 cycleEdgeList.add(new int[]{y1, x2});
                                 cycleEdgeList.add(new int[]{y2, x2});
                                 cycleEdgeList.add(new int[]{y2, x1});
 
-                                if (cycleEdgeList.stream().anyMatch(p -> profitabilityTable[p[0]][p[1]].equals(maxElemValue))) {
+                                if (cycleEdgeList.stream().anyMatch(p -> profitabilityTable[p[0]][p[1]] == maxElemValue)) {
                                     return cycleEdgeList;
                                 }
                             }

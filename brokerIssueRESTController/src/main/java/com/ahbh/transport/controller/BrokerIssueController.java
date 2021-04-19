@@ -5,11 +5,9 @@ import com.ahbh.transport.domain.BrokerIssueOutput;
 import com.ahbh.transport.service.BrokerIssueSolver;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("broker/solve")
 public class BrokerIssueController {
@@ -20,8 +18,9 @@ public class BrokerIssueController {
        this.solver = solver;
     }
 
-    @GetMapping
+    @PostMapping
     public ResponseEntity<BrokerIssueOutput> solveBrokerIssue(@RequestBody BrokerIssueInput input){
         return new ResponseEntity<>(solver.solve(input), HttpStatus.OK);
     }
+
 }
