@@ -4,6 +4,7 @@ import com.ahbh.transport.domain.BrokerIssueInput;
 import com.ahbh.transport.domain.BrokerIssueOutput;
 import com.ahbh.transport.exception.InvalidInput;
 import com.ahbh.transport.exception.NoCycleException;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -44,7 +45,8 @@ public class BrokerIssueSolver {
         if (transportCostsTable == null ||
                 input.getSupplyTable().length != transportCostsTable.length ||
                 input.getDemandTable().length != transportCostsTable[0].length ||
-                lockedRoute < -1){
+                lockedRoute < -1 ||
+                lockedRoute > supplyTable.length - 1) {
             throw new InvalidInput();
         }
 
@@ -306,5 +308,11 @@ public class BrokerIssueSolver {
         for (int i = 0; i < transportCostsTable.length; i++) {
             transportCostsTable[i] = Arrays.copyOf(transportCostsTable[i], transportCostsTable[i].length + 1);
         }
+    }
+
+    public static void main(String[] args) {
+        new BrokerIssueSolver().solve(new double[][]{new double[]{12,1,3}, new double[]{6,9,-1}},
+                new double[]{20,30}, new double[]{20,28,27},
+                2);
     }
 }
