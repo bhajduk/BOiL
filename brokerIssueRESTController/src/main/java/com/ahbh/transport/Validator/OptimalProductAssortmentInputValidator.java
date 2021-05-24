@@ -14,7 +14,7 @@ public class OptimalProductAssortmentInputValidator {
     }
 
     private static boolean coefficientsArraysLengthNotEqual(double[][] productsResourcesMatrix){
-        int validLength = productsResourcesMatrix.length;
+        int validLength = productsResourcesMatrix[0].length;
         for (double[] rows: productsResourcesMatrix) {
             if(rows.length != validLength){
                 return true;
