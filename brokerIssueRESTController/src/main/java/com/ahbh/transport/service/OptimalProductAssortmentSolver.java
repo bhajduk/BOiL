@@ -37,7 +37,7 @@ public class OptimalProductAssortmentSolver {
         addAdditionalConstraints(input, constraints);
 
         SimplexSolver solver = new SimplexSolver();
-        PointValuePair optSolution = solver.optimize(new MaxIter(100), objectiveFunction,
+        PointValuePair optSolution = solver.optimize(new MaxIter(10000), objectiveFunction,
                 new LinearConstraintSet(constraints), GoalType.MAXIMIZE, new NonNegativeConstraint(true));
 
 

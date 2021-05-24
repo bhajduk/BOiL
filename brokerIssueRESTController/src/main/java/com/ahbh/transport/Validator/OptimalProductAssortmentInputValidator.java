@@ -8,9 +8,9 @@ public class OptimalProductAssortmentInputValidator {
     }
 
     private static boolean invalidArrayLength(OptimalProductAssortmentInput input){
-        return !coefficientsArraysLengthNotEqual(input.productsResourcesMatrix()) &&
-                !missingLimits(input) &&
-                !missingProfits(input);
+        return coefficientsArraysLengthNotEqual(input.productsResourcesMatrix()) ||
+                missingLimits(input) ||
+                missingProfits(input);
     }
 
     private static boolean coefficientsArraysLengthNotEqual(double[][] productsResourcesMatrix){
