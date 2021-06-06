@@ -80,7 +80,7 @@ public class BrokerIssueSolver {
         while (true) {
             System.out.println(objectiveFunctionValue());
             int[] suboptimalIndexes = isOptimal();
-            stepByStepSolution.add(transportTable.clone());
+            stepByStepSolution.add(Arrays.stream(transportTable).map(double[]::clone).toArray(double[][]::new));
             if (suboptimalIndexes[0] == -1) {
                 break;
             }
@@ -326,11 +326,12 @@ public class BrokerIssueSolver {
         BrokerIssueInput input = new BrokerIssueInput();
         input.setSupplyTable(new double[]{20,30});
         input.setPurchasePriceTable(new double[]{10,12});
-        input.setDemandTable(new double[]{10,28,27});
+        input.setDemandTable(new double[]{10,28,100});
         input.setSellingPriceTable(new double[]{30,25,30});
         input.setTransportCostsTable(new double[][]{{8,14,17},{12,9,19}});
         input.setLockedRoute(-1);
 
-        new BrokerIssueSolver().solve(input);
+        BrokerIssueOutput solve = new BrokerIssueSolver().solve(input);
+        System.out.println();
     }
 }
