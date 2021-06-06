@@ -197,6 +197,7 @@ public class BrokerIssueSolver {
         profitabilityTable = new Double[transportTable.length][transportTable[0].length];
 
         alpha[0] = 0d;
+        int counter = 0;
 
         while (isNullPresent) {
             isNullPresent = false;
@@ -214,6 +215,7 @@ public class BrokerIssueSolver {
                     }
                 }
             }
+            if (counter++ > 1000) throw new InvalidInput();
         }
 
         for (int i = 0; i < transportTable.length; i++) {
@@ -324,11 +326,11 @@ public class BrokerIssueSolver {
 
     public static void main(String[] args) {
         BrokerIssueInput input = new BrokerIssueInput();
-        input.setSupplyTable(new double[]{20,30});
-        input.setPurchasePriceTable(new double[]{10,12});
-        input.setDemandTable(new double[]{10,28,100});
-        input.setSellingPriceTable(new double[]{30,25,30});
-        input.setTransportCostsTable(new double[][]{{8,14,17},{12,9,19}});
+        input.setSupplyTable(new double[]{1,1,1});
+        input.setPurchasePriceTable(new double[]{1,1,1});
+        input.setDemandTable(new double[]{1,1});
+        input.setSellingPriceTable(new double[]{1,1,1});
+        input.setTransportCostsTable(new double[][]{{1,1},{1,1},{1,1}});
         input.setLockedRoute(-1);
 
         BrokerIssueOutput solve = new BrokerIssueSolver().solve(input);
