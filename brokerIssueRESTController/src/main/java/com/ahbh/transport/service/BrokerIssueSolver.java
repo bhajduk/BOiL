@@ -4,7 +4,6 @@ import com.ahbh.transport.domain.BrokerIssueInput;
 import com.ahbh.transport.domain.BrokerIssueOutput;
 import com.ahbh.transport.exception.InvalidInput;
 import com.ahbh.transport.exception.NoCycleException;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -13,7 +12,7 @@ import static java.lang.Math.min;
 
 @Service
 public class BrokerIssueSolver {
-    private double[][] transportCostsTable;
+    private double[][] routeIncome;
     private double[] supplyTable;
     private double[] demandTable;
     private int lockedRoute;
@@ -28,7 +27,7 @@ public class BrokerIssueSolver {
 
         validateInput(input);
 
-        this.transportCostsTable = input.getTransportCostsTable();
+        this.routeIncome = calculateRouteIncome(input);
         this.supplyTable = input.getSupplyTable();
         this.demandTable = input.getDemandTable();
         this.lockedRoute = input.getLockedRoute();
@@ -40,20 +39,33 @@ public class BrokerIssueSolver {
         return output;
     }
 
+    private double[][] calculateRouteIncome(BrokerIssueInput input) {
+        double[][] transportCostsTable = input.getTransportCostsTable();
+        double[][] newRouteIncome = new double[transportCostsTable.length][transportCostsTable[0].length];
+        double[] sellingPriceTable = input.getSellingPriceTable();
+        double[] purchasePriceTable = input.getPurchasePriceTable();
+        for (int i = 0; i < transportCostsTable.length; i++) {
+            for (int j = 0; j < transportCostsTable[i].length; j++) {
+                newRouteIncome[i][j] = sellingPriceTable[j] - purchasePriceTable[i] - transportCostsTable[i][j];
+            }
+        }
+        return newRouteIncome;
+    }
+
     private void validateInput(BrokerIssueInput input) {
         double[][] transportCostsTable = input.getTransportCostsTable();
         if (transportCostsTable == null ||
                 input.getSupplyTable().length != transportCostsTable.length ||
                 input.getDemandTable().length != transportCostsTable[0].length ||
                 lockedRoute < -1 ||
-                lockedRoute > supplyTable.length - 1) {
+                input.getLockedRoute() > input.getDemandTable().length - 1) {
             throw new InvalidInput();
         }
 
     }
 
     public double solve(double[][] transportCostsTable, double[] supplyTable, double[] demandTable, int lockedRoute) {
-        this.transportCostsTable = transportCostsTable;
+        this.routeIncome = transportCostsTable;
         this.supplyTable = supplyTable;
         this.demandTable = demandTable;
         this.lockedRoute = lockedRoute;
@@ -147,9 +159,9 @@ public class BrokerIssueSolver {
 
     private double objectiveFunctionValue() {
         double value = 0;
-        for (int i = 0; i < transportCostsTable.length; i++) {
-            for (int j = 0; j < transportCostsTable[i].length; j++) {
-                value += transportCostsTable[i][j] * transportTable[i][j];
+        for (int i = 0; i < routeIncome.length; i++) {
+            for (int j = 0; j < routeIncome[i].length; j++) {
+                value += routeIncome[i][j] * transportTable[i][j];
             }
 
         }
@@ -159,11 +171,11 @@ public class BrokerIssueSolver {
     private void calculateLockedRouteFirst(double[] tempDemandTable, double[] tempSupplyTable) {
         Map<Integer, Double> indexValueMap = new HashMap<>();
 
-        int loopRange = transportCostsTable.length;
+        int loopRange = routeIncome.length;
         if (!balanced) loopRange--;
 
         for (int i = 0; i < loopRange; i++) {
-            indexValueMap.put(i, transportCostsTable[i][lockedRoute]);
+            indexValueMap.put(i, routeIncome[i][lockedRoute]);
         }
         List<Map.Entry<Integer, Double>> indexes = new ArrayList<>(indexValueMap.entrySet());
         indexes.sort(Map.Entry.comparingByValue((a, b) -> a > b ? -1 : 1));
@@ -192,10 +204,10 @@ public class BrokerIssueSolver {
                 for (int j = 0; j < transportTable[0].length; j++) {
                     if (transportTable[i][j] != 0) {
                         if (alpha[i] != null) {
-                            beta[j] = (transportCostsTable[i][j] - alpha[i]);
+                            beta[j] = (routeIncome[i][j] - alpha[i]);
                             continue;
                         } else if (beta[j] != null) {
-                            alpha[i] = transportCostsTable[i][j] - beta[j];
+                            alpha[i] = routeIncome[i][j] - beta[j];
                             continue;
                         }
                         isNullPresent = true;
@@ -207,7 +219,7 @@ public class BrokerIssueSolver {
         for (int i = 0; i < transportTable.length; i++) {
             for (int j = 0; j < transportTable[0].length; j++) {
                 if (transportTable[i][j] == 0) {
-                    profitabilityTable[i][j] = transportCostsTable[i][j] - alpha[i] - beta[j];
+                    profitabilityTable[i][j] = routeIncome[i][j] - alpha[i] - beta[j];
                 }
             }
         }
@@ -303,16 +315,22 @@ public class BrokerIssueSolver {
     }
 
     private void extendTransportCostsTable() {
-        transportCostsTable = Arrays.copyOf(transportCostsTable, transportCostsTable.length + 1);
-        transportCostsTable[transportCostsTable.length - 1] = new double[transportCostsTable[0].length];
-        for (int i = 0; i < transportCostsTable.length; i++) {
-            transportCostsTable[i] = Arrays.copyOf(transportCostsTable[i], transportCostsTable[i].length + 1);
+        routeIncome = Arrays.copyOf(routeIncome, routeIncome.length + 1);
+        routeIncome[routeIncome.length - 1] = new double[routeIncome[0].length];
+        for (int i = 0; i < routeIncome.length; i++) {
+            routeIncome[i] = Arrays.copyOf(routeIncome[i], routeIncome[i].length + 1);
         }
     }
 
     public static void main(String[] args) {
-        new BrokerIssueSolver().solve(new double[][]{new double[]{12,1,3}, new double[]{6,9,-1}},
-                new double[]{20,30}, new double[]{20,28,27},
-                2);
+        BrokerIssueInput input = new BrokerIssueInput();
+        input.setSupplyTable(new double[]{20,30});
+        input.setPurchasePriceTable(new double[]{10,12});
+        input.setDemandTable(new double[]{10,28,27});
+        input.setSellingPriceTable(new double[]{30,25,30});
+        input.setTransportCostsTable(new double[][]{{8,14,17},{12,9,19}});
+        input.setLockedRoute(-1);
+
+        new BrokerIssueSolver().solve(input);
     }
 }

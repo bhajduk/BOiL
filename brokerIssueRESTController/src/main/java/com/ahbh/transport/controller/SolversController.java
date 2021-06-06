@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 public class SolversController {
 
-    private OptimalProductAssortmentSolver assortmentSolver;
-
     @PostMapping("broker/solve")
     public ResponseEntity<BrokerIssueOutput> solveBrokerIssue(@RequestBody BrokerIssueInput input){
         BrokerIssueSolver brokerIssueSolver = new BrokerIssueSolver();
